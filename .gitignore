@@ -1,0 +1,21 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Secret keys
+.env
+
+# Chainlit auto-generated
+.chainlit/
+.files/
+chainlit.db
+
+# Mac/IDE files
+.DS_Store
+.vscode/
+
+# Vector DB local files
+chroma_db/
