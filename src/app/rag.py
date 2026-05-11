@@ -52,5 +52,39 @@ def build_index():
     print(f"✅ Done! {count} chunks stored in collection '{COLLECTION_NAME}'.")
 
 
+def get_retriever(top_k: int = 3):
+    """
+    Open the existing ChromaDB and return a retriever object.
+    top_k = how many chunks to fetch per query.
+    """
+    # Use the same embedding model as indexing (must match!)
+    Settings.embed_model = HuggingFaceEmbedding(model_name=EMBEDDING_MODEL)
+
+    # Open the existing ChromaDB (don't re-index)
+    chroma_client = chromadb.PersistentClient(path=str(CHROMA_DIR))
+    chroma_collection = chroma_client.get_or_create_collection(COLLECTION_NAME)
+
+    vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
+
+    # Wrap the existing store as a searchable index
+    index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
+
+    return index.as_retriever(similarity_top_k=top_k)
+
+
+def retrieve_context(question: str, top_k: int = 3) -> str:
+    """
+    Given a user's question, return the most relevant chunks joined as a single string.
+    """
+    retriever = get_retriever(top_k=top_k)
+    nodes = retriever.retrieve(question)
+
+    if not nodes:
+        return ""
+
+    # Combine chunks with a separator
+    return "\n\n---\n\n".join(node.get_content() for node in nodes)    
+
+
 if __name__ == "__main__":
     build_index()
