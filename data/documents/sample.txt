@@ -1,0 +1,14 @@
+Themis is an AI consulting startup founded in 2024.
+
+Our mission is to help small businesses adopt AI without the complexity.
+
+We offer three main services:
+1. AI Chatbot Development - We build custom AI assistants for customer support and internal use.
+2. Document Intelligence - We help companies extract insights from their PDFs, contracts, and reports.
+3. Workflow Automation - We automate repetitive business tasks using AI agents.
+
+Our pricing starts at $5,000 per project. We typically deliver projects in 4-6 weeks.
+
+Our team consists of 5 AI engineers based in Bangalore, India.
+
+We work primarily with clients in the US, UK, and Australia.
