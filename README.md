@@ -1,3 +1,14 @@
+---
+title: Multi-Source RAG AI Assistant
+emoji: 🤖
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 8000
+pinned: false
+---
+ 
+
 # 🤖 AI Chat Assistant
 
 [![CI](https://github.com/kumardatascience/ai-chat-assistant-themis/actions/workflows/ci.yml/badge.svg)](https://github.com/kumardatascience/ai-chat-assistant-themis/actions/workflows/ci.yml)
