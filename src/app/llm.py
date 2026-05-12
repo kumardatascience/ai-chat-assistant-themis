@@ -6,14 +6,15 @@ from google import genai
 from google.genai import types
 
 load_dotenv()
+
+
 API_KEY = os.getenv("GOOGLE_API_KEY")
 
-if not API_KEY:
-    raise ValueError(
-        "GOOGLE_API_KEY not found. Make sure your .env file exists and has the key."
-    )
+# Only create the client if the key exists. Tests can import this module
+# without a real key — they only need _build_system_prompt etc.
+client = genai.Client(api_key=API_KEY) if API_KEY else None
 
-client = genai.Client(api_key=API_KEY)
+
 MODEL_NAME = "gemini-2.5-flash-lite"
 
 # Base system prompt — controls bot behavior across the whole conversation
@@ -53,6 +54,12 @@ async def stream_response(history: list[dict], context: str | None = None):
     history: list of {"role": "user" | "assistant", "content": "..."}
     context: optional retrieved document chunks to ground the answer
     """
+
+    if client is None:
+        raise ValueError(
+            "GOOGLE_API_KEY not found. Make sure your .env file exists and has the key."
+        ) 
+
     gemini_contents = [
         types.Content(
             role="user" if msg["role"] == "user" else "model",
