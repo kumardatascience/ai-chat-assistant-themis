@@ -25,21 +25,25 @@ BASE_SYSTEM_PROMPT = (
 
 
 def _build_system_prompt(context: str | None) -> str:
-    """If context is provided, append it to the system prompt as grounding."""
     if not context:
-        return BASE_SYSTEM_PROMPT 
+        return BASE_SYSTEM_PROMPT
+
     return (
-    BASE_SYSTEM_PROMPT
-    + "\n\nThe following context was retrieved from the user's documents. "
-    + "If the user's question is about these documents, use this context "
-    + "as your primary source. If the documents don't contain the answer, "
-    + "say so honestly. For general questions unrelated to the documents "
-    + "(e.g., math, definitions, coding help, casual conversation), "
-    + "answer normally using your own knowledge.\n\n"
-    + "=== CONTEXT START ===\n"
-    + context
-    + "\n=== CONTEXT END ==="
-)
+        BASE_SYSTEM_PROMPT
+        + "\n\nYou have been given context to help answer the user's question. "
+        + "The context may come from the user's documents (marked 'FROM YOUR DOCUMENTS') "
+        + "and/or from a live web search (marked 'FROM THE WEB').\n\n"
+        + "Instructions:\n"
+        + "1. Use the provided context as your primary source.\n"
+        + "2. If multiple sources are provided, synthesize them into one clear answer. "
+        + "Mention briefly where key facts came from (e.g., 'According to your documents...' or 'Recent web sources indicate...').\n"
+        + "3. If the sources conflict, point this out instead of picking one silently.\n"
+        + "4. If the context doesn't contain the answer, say so honestly — don't guess.\n"
+        + "5. For general/casual questions not related to the context, answer normally from your own knowledge.\n\n"
+        + "=== CONTEXT START ===\n"
+        + context
+        + "\n=== CONTEXT END ==="
+    )
 
 
 async def stream_response(history: list[dict], context: str | None = None):
