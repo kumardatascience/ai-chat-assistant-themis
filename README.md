@@ -13,6 +13,8 @@ pinned: false
 
 [![CI](https://github.com/kumardatascience/ai-chat-assistant-themis/actions/workflows/ci.yml/badge.svg)](https://github.com/kumardatascience/ai-chat-assistant-themis/actions/workflows/ci.yml)
 
+🚀 **[Live Demo on Hugging Face Spaces →](https://huggingface.co/spaces/kumardatascience/Multi-Source-RAG-AI-System-with-Query-Routing)**
+
 An intelligent AI chatbot that routes queries between direct LLM, document retrieval (RAG), and live web search — built with **LlamaIndex Workflows**, **Gemini**, **ChromaDB**, **Tavily**, and **Chainlit**.
 
 ## ✨ Features
