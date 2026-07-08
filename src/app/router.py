@@ -12,7 +12,7 @@ from llama_index.core.workflow import (
 )
 
 from llm import client, MODEL_NAME, stream_response
-from rag import retrieve_context
+from rag import retrieve_context_with_session
 from web_search import search_web
 
 
@@ -22,6 +22,7 @@ class RouteDecision(Event):
     decision: str
     question: str
     history: list[dict]
+    session_id: str | None = None
 
 
 class ContextReady(Event):
@@ -29,6 +30,7 @@ class ContextReady(Event):
     question: str
     history: list[dict]
     decision: str
+    session_id: str | None = None
 
 
 class ChatStopEvent(StopEvent):
@@ -73,7 +75,12 @@ class ChatRouter(Workflow):
 
             cl_step.output = f"Decision: **{decision}**"
 
-        return RouteDecision(decision=decision, question=ev.question, history=ev.history)
+        return RouteDecision(
+            decision=decision,
+            question=ev.question,
+            history=ev.history,
+            session_id=getattr(ev, "session_id", None),
+        )
 
     @step
     async def gather_context(self, ev: RouteDecision) -> ContextReady:
@@ -82,7 +89,11 @@ class ChatRouter(Workflow):
         if ev.decision in ("rag", "multi"):
             async with cl.Step(name="📚 Retrieving from documents", type="retrieval") as cl_step:
                 cl_step.input = ev.question
-                rag_chunks = retrieve_context(ev.question, top_k=3)
+                rag_chunks = retrieve_context_with_session(
+                    ev.question,
+                    session_id=getattr(ev, "session_id", None),
+                    top_k=3
+)
                 if rag_chunks:
                     context_parts.append("--- FROM YOUR DOCUMENTS ---\n" + rag_chunks)
                     cl_step.output = f"Found {len(rag_chunks)} characters of relevant content."
@@ -106,6 +117,7 @@ class ChatRouter(Workflow):
             question=ev.question,
             history=ev.history,
             decision=ev.decision,
+            session_id=ev.session_id,
         )
 
     @step

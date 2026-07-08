@@ -1,10 +1,10 @@
-"""Day 9 — Chainlit chatbot with intelligent routing + reasoning steps in UI."""
+"""Chainlit chatbot with intelligent routing + live file upload support."""
 
 import chainlit as cl
 from router import ChatRouter
+from rag import index_file_for_session, clear_session
 
 
-# Create one workflow instance to reuse across all chats
 workflow = ChatRouter(timeout=60)
 
 
@@ -12,18 +12,42 @@ workflow = ChatRouter(timeout=60)
 async def start():
     cl.user_session.set("history", [])
     await cl.Message(
-        content="👋 Hi! I'm an intelligent assistant. I can answer from your documents, "
-                "search the web, or just chat. Watch the reasoning steps as I work!"
+        content="👋 Hi! I'm an intelligent assistant. Ask me anything, or upload a "
+                "PDF/text file and ask questions about it. Watch the reasoning steps as I work!"
     ).send()
 
 
 @cl.on_message
 async def main(message: cl.Message):
     history = cl.user_session.get("history")
+    session_id = cl.user_session.get("id") or "default"
+
+    # 📎 Handle any uploaded files
+    if message.elements:
+        for element in message.elements:
+            file_path = getattr(element, "path", None)
+            if not file_path:
+                continue
+
+            async with cl.Step(
+                name=f"📥 Indexing {element.name}",
+                type="tool",
+            ) as step:
+                step.input = element.name
+                try:
+                    chunk_count = index_file_for_session(file_path, session_id)
+                    step.output = f"Stored {chunk_count} chunks from **{element.name}**."
+                except Exception as e:
+                    step.output = f"⚠️ Failed to index {element.name}: {e}"
+
     history.append({"role": "user", "content": message.content})
 
-    # Workflow emits its own Chainlit steps; just await the final result
-    result = await workflow.run(question=message.content, history=history)
+    # Run the workflow with the session ID so RAG can find uploaded chunks
+    result = await workflow.run(
+        question=message.content,
+        history=history,
+        session_id=session_id,
+    )
 
     # Stream the LLM reply
     reply = cl.Message(content="")
@@ -35,3 +59,10 @@ async def main(message: cl.Message):
 
     history.append({"role": "assistant", "content": full_response})
     cl.user_session.set("history", history)
+
+
+@cl.on_chat_end
+async def end():
+    """Clean up the session's uploaded documents when the chat ends."""
+    session_id = cl.user_session.get("id") or "default"
+    clear_session(session_id)
