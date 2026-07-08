@@ -8,8 +8,7 @@ from llama_index.core.workflow import (
     StartEvent,
     StopEvent,
 )
-
-
+ 
 # 1. Define our custom event types (just data containers)
 class GreetingEvent(Event):
     message: str
